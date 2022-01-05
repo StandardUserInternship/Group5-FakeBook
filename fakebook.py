@@ -1,9 +1,10 @@
 from flask import Flask, render_template, url_for, flash, redirect
 from forms import RegistrationForm, LoginForm
+import os
 
 app = Flask(__name__)
 
-app.config['SECRET_KEY'] = '4889e1762a1993c7ed696c468baa5c34'
+app.config['SECRET_KEY'] = '4889e1762a1993c7ed696c468baa5c34' #TODO: Remove Key
 
 posts = [
     {
@@ -39,11 +40,24 @@ def register():
         return redirect(url_for('home'))
     return render_template('register.html', title='Register', form=form)
 
-@app.route("/login")
+@app.route("/login", methods=['GET', 'POST'])
 def login():
     form = LoginForm()
+    if (
+        form.validate_on_submit()
+        and form.email.data == "it doesn't matter"
+        and form.password.data == "password"
+    ):
+        flash('You have been logged in!', 'success')
+        return redirect(url_for('home'))
+    else:
+        flash('Login Unsuccessful. Please check username and password', 'danger')
     return render_template('login.html', title='Login', form=form)
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    try:
+        ip = os.environ.get('SERVER_NAME')
+        app.run(host=ip, debug=True)
+    except:
+        app.run(debug=True)
